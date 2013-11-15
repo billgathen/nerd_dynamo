@@ -12,25 +12,19 @@ class NerdDynamo
 
   def spin_up
     puts "Spinning up #{app}"
-    unless table_exists?
-      build_table
-      puts "Table '#{table_name}' is now #{status}"
-    else
-      puts "Found existing table '#{table_name}'"
-    end
+    build_table
 
-    puts "\nCreating items"
+    puts "Creating items"
     nerd_list.each do |nerd|
       load_item(nerd)
     end
-    puts "\n#{app} is online"
+    puts "#{app} is online"
   end
 
   def spin_down
     puts "Shutting-down #{app}"
-    dynamo.delete_table(table_name: table_name) if table_exists?
-    sleep 1 while table_exists? && status == 'DELETING'
-    puts "\n#{app} is down"
+    drop_table
+    puts "#{app} is down"
   end
 
   private
@@ -66,6 +60,7 @@ class NerdDynamo
     end
 
     def build_table
+      return if table_exists?
       puts "Creating table '#{table_name}'..."
       dynamo.create_table({
         table_name: table_name,
@@ -85,6 +80,12 @@ class NerdDynamo
         ]
       })
       sleep 1 while status == 'CREATING'
+    end
+
+    def drop_table
+      return unless table_exists?
+      dynamo.delete_table(table_name: table_name)
+      sleep 1 while table_exists?
     end
 
     def load_item item
