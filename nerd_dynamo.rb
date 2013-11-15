@@ -1,13 +1,26 @@
 # gem install aws-sdk-core --pre
+#
+# To run you'll need an active AWS account
+# that's been configured to use DynamoDB
+#
+# Your Aws.config info should be stored in
+# - ENV['AWS_ACCESS_KEY_ID'],
+# - ENV['AWS_SECRET_ACCESS_KEY'],
+# - ENV['AWS_REGION']
+# otherwise, uncomment the initialize method and adjust appropriately
+# DON'T HARDCODE INLINE!
+#
 require 'aws-sdk-core'
+require 'awesome_print'
+require 'pry'
 
 class NerdDynamo
   def initialize
-    Aws.config = {
-      access_key_id: ENV['MY_AWS_ACCESS_KEY_ID'],
-      secret_access_key: ENV['MY_AWS_SECRET_ACCESS_KEY'],
-      region: ENV['MY_AWS_REGION']
-    }
+    # Aws.config = {
+    #   access_key_id: ENV['AWS_ACCESS_KEY_ID'],
+    #   secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'],
+    #   region: ENV['AWS_REGION']
+    # }
   end
 
   def spin_up
@@ -25,6 +38,23 @@ class NerdDynamo
     puts "Shutting-down #{app}"
     drop_table
     puts "#{app} is down"
+  end
+
+  def show
+    unless table_exists?
+      puts "Table '#{table_name}' not found"
+      return
+    end
+
+    rsp = dynamo.scan(
+      table_name: table_name,
+      select: 'ALL_ATTRIBUTES'
+    )
+    puts rsp.items.map{ |i| "#{i['name']['s']} (#{i['title']['s']})" }.join("\n")
+  end
+
+  def self.actions
+    public_instance_methods(false).map(&:to_s)
   end
 
   private
@@ -104,10 +134,14 @@ class NerdDynamo
 end
 
 if __FILE__ == $0
+  actions = NerdDynamo.actions
   unless ARGV[0]
-    options = NerdDynamo.public_instance_methods(false).join('|')
-    $stderr.puts "USAGE: #{$0} [#{options}]"
+    $stderr.puts "USAGE: #{$0} [#{actions.join('|')}]"
   else
-    NerdDynamo.new.send(ARGV[0])
+    nd = NerdDynamo.new
+    ARGV.each do |action|
+      nd.send(action) if actions.include?(action)
+      puts
+    end
   end
 end
