@@ -33,7 +33,7 @@ class NerdDynamo
   end
 
   def show
-    return unless table_exists?
+    return [] unless table_exists?
 
     rsp = dynamo.scan(
       table_name: table_name,
