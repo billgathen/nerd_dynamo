@@ -24,33 +24,29 @@ class NerdDynamo
   end
 
   def spin_up
-    puts "Spinning up #{app}"
     build_table
-
-    puts "Creating items"
-    nerd_list.each do |nerd|
-      load_item(nerd)
-    end
-    puts "#{app} is online"
+    nerd_list.each { |nerd| load_item(nerd) }
+    "#{app} is up"
   end
 
   def spin_down
-    puts "Shutting-down #{app}"
     drop_table
-    puts "#{app} is down"
+    "#{app} is down"
   end
 
   def show
-    unless table_exists?
-      puts "Table '#{table_name}' not found"
-      return
-    end
+    return unless table_exists?
 
     rsp = dynamo.scan(
       table_name: table_name,
-      select: 'ALL_ATTRIBUTES'
+      attributes_to_get: [ 'name', 'title' ]
     )
-    puts rsp.items.map{ |i| "#{i['name']['s']} (#{i['title']['s']})" }.join("\n")
+
+    rsp.items.map{ |i| { name: i['name'].s, title: i['title'].s } }
+  end
+
+  def show_as_text
+    show.map{ |i| "#{i[:name]} (#{i[:title]})" }.join("\n")
   end
 
   def self.actions
@@ -91,23 +87,11 @@ class NerdDynamo
 
     def build_table
       return if table_exists?
-      puts "Creating table '#{table_name}'..."
       dynamo.create_table({
         table_name: table_name,
-        key_schema: [{
-          attribute_name: 'name',
-          key_type: 'HASH'
-        }],
-        provisioned_throughput: {
-          read_capacity_units: 1,
-          write_capacity_units: 1
-        },
-        attribute_definitions: [
-          {
-            attribute_name: 'name',
-            attribute_type: 'S'
-          }
-        ]
+        key_schema: [{ attribute_name: 'name', key_type: 'HASH' }],
+        provisioned_throughput: { read_capacity_units: 1, write_capacity_units: 1 },
+        attribute_definitions: [ { attribute_name: 'name', attribute_type: 'S' } ]
       })
       sleep 1 while status == 'CREATING'
     end
@@ -119,15 +103,12 @@ class NerdDynamo
     end
 
     def load_item item
-      # will overwrite if exists
+      # will create if doesn't exist
       dynamo.update_item({
         table_name: table_name,
         key: { name: { s: item[:name] } },
         attribute_updates: {
-          title: {
-            value: { s: item[:title] },
-            action: 'PUT'
-          }
+          title: { value: { s: item[:title] }, action: 'PUT' }
         }
       })
     end
@@ -140,8 +121,7 @@ if __FILE__ == $0
   else
     nd = NerdDynamo.new
     ARGV.each do |action|
-      nd.send(action) if actions.include?(action)
-      puts
+      puts nd.send(action) if actions.include?(action)
     end
   end
 end
