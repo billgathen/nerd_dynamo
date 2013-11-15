@@ -11,8 +11,6 @@
 # DON'T HARDCODE INLINE!
 #
 require 'aws-sdk-core'
-require 'awesome_print'
-require 'pry'
 
 class NerdDynamo
   def initialize
