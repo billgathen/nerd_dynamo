@@ -1,19 +1,18 @@
-# require_relative 'lib/nerd_dynamo'
+require_relative 'lib/nerd_dynamo'
 require 'sinatra'
 
 get '/' do
-  @nerds = []
-  # @nerds = NerdDynamo.new.show.sort{ |a,b| a[:name] <=> b[:name] }
+  @nerds = NerdDynamo.new.show.sort{ |a,b| a[:name] <=> b[:name] }
   erb :index
 end
 
 get '/spin_up' do
-  # NerdDynamo.new.spin_up
+  NerdDynamo.new.spin_up
   redirect '/'
 end
 
 get '/spin_down' do
-  # NerdDynamo.new.spin_down
+  NerdDynamo.new.spin_down
   redirect '/'
 end
 

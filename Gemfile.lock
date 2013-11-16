@@ -1,15 +1,10 @@
-GIT
-  remote: git://github.com/aws/aws-sdk-core-ruby
-  revision: 9aa9a0bccec6c3d5c98c7f360e75eab3d78ba9b9
+GEM
+  remote: https://rubygems.org/
   specs:
     aws-sdk-core (2.0.0.rc1)
       builder (~> 3.0)
       multi_json (~> 1.0)
       multi_xml (~> 0.5)
-
-GEM
-  remote: https://rubygems.org/
-  specs:
     builder (3.2.2)
     multi_json (1.8.2)
     multi_xml (0.5.5)
@@ -26,5 +21,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aws-sdk-core!
+  aws-sdk-core (= 2.0.0.rc1)
   sinatra
