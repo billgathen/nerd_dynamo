@@ -11,6 +11,7 @@
 # DON'T HARDCODE INLINE!
 #
 require 'aws-sdk-core'
+require 'json'
 
 class NerdDynamo
   def initialize
@@ -62,17 +63,15 @@ class NerdDynamo
     end
 
     def nerd_list
-      [
-        { name: 'Bill', title: 'Integration Engineer' },
-        { name: 'Pete', title: 'Senior Network Administrator' },
-        { name: 'Keith', title: 'Web Developer' },
-        { name: 'Michael', title: 'Integration Engineer' },
-        { name: 'Ben', title: 'Network Administrator' }
-      ]
+      JSON.parse(s3.get_object(bucket: "nerddynamolist", key: "nerd_list.json").body.string)
     end
 
     def dynamo
       @dynamo ||= Aws::DynamoDB.new
+    end
+
+    def s3
+      @s3 ||= Aws::S3.new
     end
 
     def table_name
@@ -104,9 +103,9 @@ class NerdDynamo
       # will create if doesn't exist
       dynamo.update_item({
         table_name: table_name,
-        key: { name: { s: item[:name] } },
+        key: { name: { s: item['name'] } },
         attribute_updates: {
-          title: { value: { s: item[:title] }, action: 'PUT' }
+          title: { value: { s: item['title'] }, action: 'PUT' }
         }
       })
     end
