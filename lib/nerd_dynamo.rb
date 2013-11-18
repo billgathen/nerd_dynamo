@@ -44,6 +44,21 @@ class NerdDynamo
     rsp.items.map{ |i| { name: i['name'].s, title: i['title'].s } }
   end
 
+  def find name
+    return [] unless table_exists?
+
+    rsp = dynamo.get_item(
+      table_name: table_name,
+      key: { 'name' => { s: name } },
+      attributes_to_get: [ 'name', 'title' ]
+    )
+    if rsp.item
+      [{ name: rsp.item['name'].s, title: rsp.item['title'].s }]
+    else
+      []
+    end
+  end
+
   def show_as_text
     show.map{ |i| "#{i[:name]} (#{i[:title]})" }.join("\n")
   end

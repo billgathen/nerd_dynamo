@@ -6,6 +6,15 @@ get '/' do
   erb :index
 end
 
+post '/show' do
+  if params['name'].size > 0
+    @nerds = NerdDynamo.new.find(params['name'])
+  else
+    redirect '/'
+  end
+  erb :index
+end
+
 get '/spin_up' do
   NerdDynamo.new.spin_up
   redirect '/'
@@ -30,11 +39,15 @@ __END__
 <body>
   <div class="container">
     <div class="pull-left">
-      <h1>Nerd Dynamo!</h1>
+      <a href="/"><h1>Nerd Dynamo!</h1></a>
     </div>
     <div class="pull-right">
-      <a href="/spin_up" class="btn btn-success">Spin up that dynamo</a>
-      <a href="/spin_down" class="btn btn-danger">Spin down that dynamo</a>
+      <form class="form form-inline" action="/show" method="post">
+        <label for="name">Find By Name</label>
+        <input type="text" name="name" />
+        <a href="/spin_up" class="btn btn-success">Spin up that dynamo</a>
+        <a href="/spin_down" class="btn btn-danger">Spin down that dynamo</a>
+      </form>
     </div>
     <table class="table table-hover">
       <thead>
