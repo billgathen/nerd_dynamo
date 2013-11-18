@@ -1,27 +1,39 @@
 require_relative 'lib/nerd_dynamo'
 require 'sinatra'
 
+before do
+  @nd = NerdDynamo.new
+end
+
 get '/' do
-  @nerds = NerdDynamo.new.show.sort{ |a,b| a[:name] <=> b[:name] }
+  @nerds = @nd.show
   erb :index
 end
 
 post '/show' do
   if params['name'].size > 0
-    @nerds = NerdDynamo.new.find(params['name'])
+    @nerds = @nd.find(params['name'])
   else
     redirect '/'
   end
   erb :index
 end
 
+post '/add' do
+  if params['name'].size > 0 && params['title'].size > 0
+    @nd.add(params['name'], params['title'])
+  end
+
+  redirect '/'
+end
+
 get '/spin_up' do
-  NerdDynamo.new.spin_up
+  @nd.spin_up
   redirect '/'
 end
 
 get '/spin_down' do
-  NerdDynamo.new.spin_down
+  @nd.spin_down
   redirect '/'
 end
 
@@ -65,6 +77,25 @@ __END__
         <% end %>
       </tbody>
     </table>
+    <form class="form form-horizontal" action="/add" method="post">
+      <form-group>
+        <label for="name" class="col-xs-2 control-label">Name</label>
+        <div class="col-xs-10">
+          <input class="form-control" type="text" id="name" name="name" />
+        </div>
+      </form-group>
+      <form-group>
+        <label for="title" class="col-xs-2 control-label">Title</label>
+        <div class="col-xs-10">
+          <input class="form-control" type="text" id="title" name="title" />
+        </div>
+      </form-group>
+      <form-group>
+        <div class="col-xs-offset-2 col-xs-10">
+          <input class="form-control btn btn-default" type="submit" value="Add Nerd" />
+        </div>
+      </form-group>
+    </form>
   </div>
 </body>
 </html>

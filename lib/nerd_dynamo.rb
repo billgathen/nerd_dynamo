@@ -41,7 +41,15 @@ class NerdDynamo
       attributes_to_get: [ 'name', 'title' ]
     )
 
-    rsp.items.map{ |i| { name: i['name'].s, title: i['title'].s } }
+    rsp.items.
+      map{ |i| { name: i['name'].s, title: i['title'].s } }.
+      sort{ |a,b| a[:name] <=> b[:name] }
+  end
+
+  def add name, title
+    return [] unless table_exists?
+
+    load_item({ 'name' => name, 'title' => title })
   end
 
   def find name
