@@ -11,7 +11,7 @@
 # DON'T HARDCODE INLINE!
 #
 require 'aws-sdk-core'
-require 'json'
+require 'multi_json'
 
 class NerdDynamo
   def initialize
@@ -86,7 +86,7 @@ class NerdDynamo
     end
 
     def nerd_list
-      JSON.parse(s3.get_object(bucket: "nerddynamolist", key: "nerd_list.json").body.string)
+      MultiJson.load(s3.get_object(bucket: "nerddynamolist", key: "nerd_list.json").body.string)
     end
 
     def dynamo

@@ -22,4 +22,5 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk-core
+  multi_json
   sinatra
